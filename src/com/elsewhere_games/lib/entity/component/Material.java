@@ -35,6 +35,7 @@ public class Material implements Component {
 	 */
 	public Material(final Texture texture) {
 		this.texture = texture;
+		this.color = Color.Black;
 	}
 	
 	/*
