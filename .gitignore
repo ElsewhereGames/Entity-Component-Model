@@ -1,3 +1,6 @@
+# Intellij IDEA
+*.iml
+
 bin/
 gen/
 
