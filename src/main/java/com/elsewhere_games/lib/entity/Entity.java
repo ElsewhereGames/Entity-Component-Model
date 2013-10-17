@@ -119,14 +119,14 @@ public class Entity {
 	 */
 	public void addComponent(Component component) {
 		if (this.hasComponent(component.getClass())) {
-			throw new IllegalArgumentException("This entitiy already contains a component of the type specified.");
+			throw new IllegalArgumentException("This entity already contains a component of the type specified.");
 		}
 		
 		this.components.put(component.getClass(), component);
 	}
 	
 	/**
-	 * <p>Removes any component with the specified <code>singature</code> from
+	 * <p>Removes any component with the specified <code>signature</code> from
 	 * this entity.</p>
 	 * 
 	 * @param signature The class signature of the component to remove.
