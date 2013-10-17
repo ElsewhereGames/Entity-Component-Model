@@ -52,7 +52,7 @@ public class Entity {
 	
 	//// Components ////
 	
-	public Map<Class<?>, Component> components;
+	private Map<Class<?>, Component> components;
 	
 	/**
 	 * <p>Check to see if this entity contains a component of the specified
