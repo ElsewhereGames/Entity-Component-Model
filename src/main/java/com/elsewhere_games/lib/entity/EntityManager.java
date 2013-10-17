@@ -44,6 +44,18 @@ public class EntityManager {
 		
 		return entity;
 	}
+
+	/**
+	 * <p>Check to see if this manager contains a particular entity.</p>
+	 *
+	 * @param entity The entity to check for.
+	 *
+	 * @return True if the specified entity is managed by this manager. false
+	 * otherwise.
+	 */
+	public boolean hasEntity(Entity entity) {
+		return this.entities.contains(entity);
+	}
 	
 	/**
 	 * <p>Destroys an existing entity.</p>
@@ -80,12 +92,12 @@ public class EntityManager {
 
 		return null;
 	}
-	
+
+	//// Queries ////
+
 	/*
-	 * Query System
-	 * 
-	 * Since most queries for entities will be repeated for every run of the
-	 * game loop, the query system allows for common queries to be cached. This
+	 * Since most queries for entities will be repeated quite often,
+	 * the query system allows for common queries to be cached. This
 	 * will provide a great speed in accessing the desired entities.
 	 */
 	
