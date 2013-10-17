@@ -1,5 +1,8 @@
 package com.elsewhere_games.lib.entity;
 
+// Java Util
+import java.util.UUID;
+
 // JUnit
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,6 +16,14 @@ public class EntityManagerTestCase {
 	public void entityManagerCanBeCreated() {
 		EntityManager manager = new EntityManager();
 		Assert.assertNotNull(manager);
+	}
+
+	@Test
+	public void entityManagerCanCreateEntities() {
+		EntityManager manager = new EntityManager();
+		UUID entityId = manager.createEntity();
+
+		Assert.assertNotNull(entityId);
 	}
 
 }
