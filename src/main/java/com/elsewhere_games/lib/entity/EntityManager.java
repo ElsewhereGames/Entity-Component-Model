@@ -1,64 +1,75 @@
 package com.elsewhere_games.lib.entity;
 
+// Java Containers
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+// Java Utilities
 import java.util.UUID;
 
 public class EntityManager {
 
-	/*
-	 * Constructors
-	 */
+	//// Life-Cycle ////
 	
 	/**
 	 * <p>Class constructor.</p>
 	 */
 	public EntityManager() {
-		this.entities = new HashMap<UUID, Entity>();
+		this.entities = new ArrayList<Entity>();
 		
 		// Query system:
 		this.queries = new HashMap<UUID, Class<?>[]>();
-		this.cachedQueryResults = new HashMap<UUID, ArrayList<UUID>>();
+		this.cachedQueryResults = new HashMap<UUID, List<Entity>>();
 	}
 	
-	/*
-	 * Entities
-	 */
+	//// Entities ////
 	
-	private Map<UUID, Entity> entities;
+	private List<Entity> entities;
 	
 	/**
 	 * <p>Creates a new entity.</p>
 	 * 
-	 * @return The identifier of the newly created entity.
+	 * @return The newly created entity.
 	 */
-	public UUID createEntity() {
+	public Entity createEntity() {
 		Entity entity = new Entity();
-		this.entities.put(entity.getId(), entity);
+		this.entities.add(entity);
 		
 		// Mark all queries as dirty by clearing the cache:
 		for (UUID queryId : this.queries.keySet()) {
 			this.cachedQueryResults.remove(queryId);
 		}
 		
-		return entity.getId();
+		return entity;
+	}
+
+	/**
+	 * <p>Check to see if this manager contains a particular entity.</p>
+	 *
+	 * @param entity The entity to check for.
+	 *
+	 * @return True if the specified entity is managed by this manager, false
+	 * otherwise.
+	 */
+	public boolean hasEntity(Entity entity) {
+		return this.entities.contains(entity);
 	}
 	
 	/**
 	 * <p>Destroys an existing entity.</p>
 	 * 
-	 * @param entity The identifier of the entity to destroy.
+	 * @param entity The entity to destroy.
 	 */
-	public void destroyEntity(UUID entity) {
-		// Remove the entity:
-		Entity deletedEntity = this.entities.remove(entity);
-		
+	public void destroyEntity(Entity entity) {
+
 		// Mark queries which should return the specified entity as dirty:
-		if (deletedEntity != null) {
+		if (this.entities.remove(entity)) {
+
 			// Compare the contents of every query against the entity:
 			for (UUID queryId : this.queries.keySet()) {
-				if (deletedEntity.hasComponents(this.queries.get(queryId))) {
+				if (entity.hasComponents(this.queries.get(queryId))) {
 					this.cachedQueryResults.remove(queryId);
 				}
 			}
@@ -73,14 +84,20 @@ public class EntityManager {
 	 * if no entity with that identifier exists.
 	 */
 	public Entity getEntity(UUID id) {
-		return this.entities.get(id);
+		for (Entity entity : this.entities) {
+			if (entity.getId() == id) {
+				return entity;
+			}
+		}
+
+		return null;
 	}
-	
+
+	//// Queries ////
+
 	/*
-	 * Query System
-	 * 
-	 * Since most queries for entities will be repeated for every run of the
-	 * game loop, the query system allows for common queries to be cached. This
+	 * Since most queries for entities will be repeated quite often,
+	 * the query system allows for common queries to be cached. This
 	 * will provide a great speed in accessing the desired entities.
 	 */
 	
@@ -119,7 +136,7 @@ public class EntityManager {
 		
 	}
 	
-	private Map<UUID, ArrayList<UUID>> cachedQueryResults;
+	private Map<UUID, List<Entity>> cachedQueryResults;
 	
 	/**
 	 * <p>Executes the query with <code>queryId</code> generated from this
@@ -131,24 +148,25 @@ public class EntityManager {
 	 * @return A list of all entities which meets the specifications of the
 	 * query provided when it was created.
 	 */
-	public ArrayList<UUID> executeQuery(UUID queryId) {
+	public List<Entity> executeQuery(UUID queryId) {
 		// Check to see if a query has been made:
 		boolean isQueryCached = this.cachedQueryResults.containsKey(queryId);
 		
 		if (!isQueryCached) {
-			this.cachedQueryResults.put(queryId, this.buildQueryCache(queryId));
+			this.cachedQueryResults.put(queryId, this.findQueryMatches(queryId));
 		}
 		
 		return this.cachedQueryResults.get(queryId);
 	}
-	
-	private ArrayList<UUID> buildQueryCache(UUID queryId) {
-		ArrayList<UUID> matchingEntities = new ArrayList<UUID>();
+
+	// Build a list of all entities matching the query:
+	private List<Entity> findQueryMatches(UUID queryId) {
+		List<Entity> matchingEntities = new ArrayList<Entity>();
 		Class<?>[] signatures = this.queries.get(queryId);
  		
-		for (Entity entity : this.entities.values()) {
+		for (Entity entity : this.entities) {
 			if (entity.hasComponents(signatures)) {
-				matchingEntities.add(entity.getId());
+				matchingEntities.add(entity);
 			}
 		}
 		
