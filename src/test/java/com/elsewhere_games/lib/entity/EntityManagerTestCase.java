@@ -4,16 +4,28 @@ package com.elsewhere_games.lib.entity;
 import org.junit.Assert;
 import org.junit.Test;
 
+// Java Utilities
+import java.util.List;
+import java.util.UUID;
+
+// Testing Elsewhere
+import com.elsewhere_games.lib.entity.mock.MockComponent;
+import com.elsewhere_games.lib.entity.mock.AnotherMockComponent;
+
 /**
  * <p>Test case for the entity manager.</p>
  */
 public class EntityManagerTestCase {
+
+	//// Life-Cycle ////
 
 	@Test
 	public void entityManagerCanBeCreated() {
 		EntityManager manager = new EntityManager();
 		Assert.assertNotNull(manager);
 	}
+
+	//// Entities ////
 
 	@Test
 	public void entityManagerCanCreateEntities() {
@@ -34,6 +46,78 @@ public class EntityManagerTestCase {
 		manager.destroyEntity(entity);
 
 		Assert.assertFalse(manager.hasEntity(entity));
+	}
+
+	@Test
+	public void entityCanBeFoundById() {
+		EntityManager manager = new EntityManager();
+		Entity entity = manager.createEntity();
+
+		Entity foundEntity = manager.getEntity(entity.getId());
+
+		Assert.assertEquals(entity, foundEntity);
+	}
+
+	//// Queries ////
+
+	@Test
+	public void emptyQueriesCanBeCreated() {
+		EntityManager manager = new EntityManager();
+
+		UUID queryId = manager.createQuery();
+		Assert.assertNotNull(queryId);
+		Assert.assertTrue(manager.executeQuery(queryId).isEmpty());
+	}
+
+	@Test
+	public void simpleQueriesCanBeCreated() {
+		EntityManager manager = new EntityManager();
+
+		Entity entity = manager.createEntity();
+		entity.addComponent(new MockComponent());
+
+		UUID queryId = manager.createQuery(MockComponent.class);
+		List<Entity> queryResults = manager.executeQuery(queryId);
+
+		Assert.assertTrue(queryResults.size() == 1);
+		Assert.assertTrue(queryResults.contains(entity));
+	}
+
+	@Test
+	public void complexQueriesCanBeCreated() {
+		EntityManager manager = new EntityManager();
+
+		Entity entityWithComponent = manager.createEntity();
+		entityWithComponent.addComponent(new MockComponent());
+
+		Entity entityWithAnotherComponent = manager.createEntity();
+		entityWithAnotherComponent.addComponent(new AnotherMockComponent());
+
+		UUID queryId = manager.createQuery(MockComponent.class);
+		List<Entity> queryResults = manager.executeQuery(queryId);
+
+		Assert.assertTrue(queryResults.size() == 1);
+		Assert.assertTrue(queryResults.contains(entityWithComponent));
+		Assert.assertFalse(queryResults.contains(entityWithAnotherComponent));
+	}
+
+	@Test
+	public void queriesCanBeUpdated() {
+		EntityManager manager = new EntityManager();
+
+		Entity entity = manager.createEntity();
+		entity.addComponent(new MockComponent());
+
+		UUID queryId = manager.createQuery(AnotherMockComponent.class);
+
+		List<Entity> initialQueryResults = manager.executeQuery(queryId);
+		Assert.assertTrue(initialQueryResults.isEmpty());
+
+		manager.updateQuery(queryId, MockComponent.class);
+
+		List<Entity> updatedQueryResults = manager.executeQuery(queryId);
+		Assert.assertFalse(updatedQueryResults.isEmpty());
+		Assert.assertTrue(updatedQueryResults.contains(entity));
 	}
 
 }

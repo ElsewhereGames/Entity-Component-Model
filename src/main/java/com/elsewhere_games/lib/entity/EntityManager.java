@@ -50,7 +50,7 @@ public class EntityManager {
 	 *
 	 * @param entity The entity to check for.
 	 *
-	 * @return True if the specified entity is managed by this manager. false
+	 * @return True if the specified entity is managed by this manager, false
 	 * otherwise.
 	 */
 	public boolean hasEntity(Entity entity) {
