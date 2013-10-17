@@ -19,10 +19,8 @@ import java.util.UUID;
 
 public class Entity {
 
-	/*
-	 * Constructors
-	 */
-	
+	//// Life-Cycle ////
+
 	/**
 	 * <p>Class constructor. Creates a new entity with a random id. This class 
 	 * has been made protected so that only an entity manager can create new
@@ -32,11 +30,11 @@ public class Entity {
 		this.id = UUID.randomUUID();
 		this.components = new HashMap<Class<?>, Component>();
 	}
-	
+
+	//// Identity ////
+
 	/*
-	 * Identification
-	 * 
-	 * Each entity contains a unique identifier by which they can be accurately 
+	 * Each entity contains a unique identifier by which they can be accurately
 	 * identifier. Note that UUIDs are 128 bits, so they may be a bit too heavy-
 	 * weight.
 	 */
@@ -52,9 +50,7 @@ public class Entity {
 		return this.id;
 	}
 	
-	/*
-	 * Components
-	 */
+	//// Components ////
 	
 	public Map<Class<?>, Component> components;
 	
@@ -103,9 +99,7 @@ public class Entity {
 	 */
 	@SuppressWarnings("unchecked")
 	public <C extends Component> C getComponent(Class<C> signature) {
-		C component = (C)this.components.get(signature);
-		
-		return component;
+		return (C)this.components.get(signature);
 	}
 	
 	/**
@@ -135,9 +129,7 @@ public class Entity {
 		this.components.remove(signature);
 	}
 	
-	/*
-	 * Java Object Overrides
-	 */
+	//// Object Overrides ////
 	
 	/**
 	 * <p>Returns a <code>String</code> representation of the unique identifier
@@ -145,7 +137,8 @@ public class Entity {
 	 * 
 	 * @return The <code>String</code> version of this object's identifier.
 	 */
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return this.id.toString();
 	}
 }
