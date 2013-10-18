@@ -36,7 +36,7 @@ public class EntityManager {
 	
 	//// Entities ////
 	
-	private Set<Entity> entities;
+	private final Set<Entity> entities;
 	
 	/**
 	 * <p>Creates a new entity.</p>
@@ -129,7 +129,7 @@ public class EntityManager {
 	 * will provide a great speed in accessing the desired entities.
 	 */
 	
-	private Map<UUID, Class<?>[]> queries;
+	private final Map<UUID, Class<?>[]> queries;
 	
 	/**
 	 * <p>Creates a query into the entity system which, when executed, will
@@ -164,7 +164,7 @@ public class EntityManager {
 		
 	}
 	
-	private Map<UUID, List<Entity>> cachedQueryResults;
+	private final Map<UUID, List<Entity>> cachedQueryResults;
 	
 	/**
 	 * <p>Executes the query with <code>queryId</code> generated from this
