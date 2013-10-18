@@ -3,12 +3,22 @@ package com.elsewhere_games.lib.entity;
 // Java Containers
 import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.HashMap;
 
 // Java Utilities
 import java.util.UUID;
 
+/**
+ *<p>The entity manager can maintain a collection of entities. More-over, a set
+ * of queries to those entities can be created, making finding the right set of
+ * entities for a particular task quick and easy.</p>
+ *
+ * <p>The backing collections used in this manager are not thread-safe, and
+ * therefore any access must be synchronized externally.</p>
+ */
 public class EntityManager {
 
 	//// Life-Cycle ////
@@ -17,7 +27,7 @@ public class EntityManager {
 	 * <p>Class constructor.</p>
 	 */
 	public EntityManager() {
-		this.entities = new ArrayList<Entity>();
+		this.entities = new HashSet<Entity>();
 		
 		// Query system:
 		this.queries = new HashMap<UUID, Class<?>[]>();
@@ -26,7 +36,7 @@ public class EntityManager {
 	
 	//// Entities ////
 	
-	private List<Entity> entities;
+	private Set<Entity> entities;
 	
 	/**
 	 * <p>Creates a new entity.</p>
