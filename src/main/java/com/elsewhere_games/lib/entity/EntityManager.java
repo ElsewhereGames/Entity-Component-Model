@@ -56,6 +56,24 @@ public class EntityManager {
 	}
 
 	/**
+	 * <p>Adds the specified entity to this component. Any queries which were
+	 * run which would have included the new entity will have to be executed
+	 * again to include it.</p>
+	 *
+	 * @param entity The entity to add to this manager.
+	 */
+	public void addEntity(Entity entity) {
+		this.entities.add(entity);
+
+		// Mark any cached query as dirty if there is a match:
+		for (UUID queryId : this.queries.keySet()) {
+			if (entity.hasComponents(this.queries.get(queryId))) {
+				this.cachedQueryResults.remove(queryId); 			// May not be cached, but no need to check.
+			}
+		}
+	}
+
+	/**
 	 * <p>Check to see if this manager contains a particular entity.</p>
 	 *
 	 * @param entity The entity to check for.
@@ -80,7 +98,7 @@ public class EntityManager {
 			// Compare the contents of every query against the entity:
 			for (UUID queryId : this.queries.keySet()) {
 				if (entity.hasComponents(this.queries.get(queryId))) {
-					this.cachedQueryResults.remove(queryId);
+					this.cachedQueryResults.remove(queryId);		// May not be cached, but no need to check.
 				}
 			}
 		}
