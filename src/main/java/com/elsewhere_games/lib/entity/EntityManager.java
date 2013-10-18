@@ -61,8 +61,15 @@ public class EntityManager {
 	 * again to include it.</p>
 	 *
 	 * @param entity The entity to add to this manager.
+	 *
+	 * @throws IllegalArgumentException If the specified entity is already
+	 * contained in this manager.
 	 */
 	public void addEntity(Entity entity) {
+		if (this.entities.contains(entity)) {
+			throw new IllegalArgumentException("This manager already contains the specified entity.");
+		}
+
 		this.entities.add(entity);
 
 		// Mark any cached query as dirty if there is a match:
@@ -89,8 +96,14 @@ public class EntityManager {
 	 * <p>Destroys an existing entity.</p>
 	 * 
 	 * @param entity The entity to destroy.
+	 *
+	 * @throws IllegalArgumentException If this manager does not contain the
+	 * specified entity.
 	 */
 	public void destroyEntity(Entity entity) {
+		if (!this.entities.contains(entity)) {
+			throw new IllegalArgumentException("This manager does not contain the specified entity.");
+		}
 
 		// Mark queries which should return the specified entity as dirty:
 		if (this.entities.remove(entity)) {

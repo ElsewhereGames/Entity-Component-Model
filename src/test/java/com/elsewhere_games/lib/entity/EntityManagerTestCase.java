@@ -49,6 +49,25 @@ public class EntityManagerTestCase {
 	}
 
 	@Test
+	public void entitiesCanBeAddedOnlyOnce() {
+		EntityManager manager = new EntityManager();
+		Entity entity = new Entity();
+
+		manager.addEntity(entity);
+
+		Assert.assertTrue(manager.hasEntity(entity));
+
+		try {
+			manager.addEntity(entity);
+			Assert.fail();
+		}
+
+		catch (IllegalArgumentException argumentException) {
+			// Do nothing, expected.
+		}
+	}
+
+	@Test
 	public void entitiesCanBeRemoved() {
 		EntityManager manager = new EntityManager();
 		Entity entity = manager.createEntity();
@@ -58,6 +77,23 @@ public class EntityManagerTestCase {
 		manager.destroyEntity(entity);
 
 		Assert.assertFalse(manager.hasEntity(entity));
+	}
+
+	@Test
+	public void entitiesCannotBeRemovedIfNotPresent() {
+		EntityManager manager = new EntityManager();
+		Entity entity = new Entity();
+
+		Assert.assertFalse(manager.hasEntity(entity));
+
+		try {
+			manager.destroyEntity(entity);
+			Assert.fail();
+		}
+
+		catch (IllegalArgumentException argumentException) {
+			// Do nothing, expected.
+		}
 	}
 
 	@Test
