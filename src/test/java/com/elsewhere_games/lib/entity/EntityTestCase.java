@@ -87,4 +87,12 @@ public class EntityTestCase {
 		Assert.assertFalse(entity.hasComponent(MockComponent.class));
 	}
 
+	@Test
+	public void componentsCanBeObserved() {
+		Entity entity = new Entity();
+		MockComponent mockComponent = new MockComponent();
+
+		entity.addComponent(mockComponent);
+	}
+
 }

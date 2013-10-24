@@ -1,9 +1,15 @@
 package com.elsewhere_games.lib.entity;
 
-//Utility Imports
+// Utility Containers
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+// Events Elsewhere
+import com.elsewhere_games.lib.entity.event.ComponentChangeListener;
+import com.elsewhere_games.lib.entity.event.ComponentChangeType;
 
 /**
  * <p>An entity is a container for components. Any entity can hold a mix of 
@@ -29,6 +35,7 @@ public class Entity {
 	protected Entity() {
 		this.id = UUID.randomUUID();
 		this.components = new HashMap<Class<?>, Component>();
+		this.listeners = new ArrayList<ComponentChangeListener>();
 	}
 
 	//// Identity ////
@@ -127,6 +134,43 @@ public class Entity {
 	 */
 	public void removeComponent(Class<?> signature) {
 		this.components.remove(signature);
+	}
+
+	//// Component Change Listeners ////
+
+	private List<ComponentChangeListener> listeners;	// Notified on a change to the component list.
+
+	/**
+	 * <p>Adds a component change listener to this entity. When there is a
+	 * change to the collection of components of this entity, the listener
+	 * will be notified.</p>
+	 *
+	 * <p>Notifications are sent out in the order in which change listeners
+	 * are registered with this entity, in the same thread context as in
+	 * which the change to the component collection occurs.</p>
+	 *
+	 * @param listener Will receive notification of changes to the component set.
+	 */
+	public void addComponentChangeListener(final ComponentChangeListener listener) {
+		this.listeners.add(listener);
+	}
+
+	/**
+	 * <p>Removes a component change from this entity. The listener will
+	 * no longer receive notification about changes to the component set
+	 * of this entity.</p>
+	 *
+	 * @param listener Will no longer receive notifications about the component set.
+	 */
+	public void removeComponentChangeListener(final ComponentChangeListener listener) {
+		this.listeners.remove(listener);
+	}
+
+	// Trigger the call-back of all listeners registered with this class.
+	private void fireComponentChange(ComponentChangeType type, Component context) {
+		for (ComponentChangeListener listener : this.listeners) {
+			listener.onComponentChange(type, context);
+		}
 	}
 	
 	//// Object Overrides ////
