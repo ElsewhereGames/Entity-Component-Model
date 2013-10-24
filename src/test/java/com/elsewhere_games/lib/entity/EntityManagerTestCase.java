@@ -187,4 +187,23 @@ public class EntityManagerTestCase {
 		Assert.assertTrue(updatedQueryResults.contains(entity));
 	}
 
+	@Test
+	public void queriesHaveToBeReRunWhenAnEntityChanges() {
+		EntityManager manager = new EntityManager();
+
+		Entity entity = new Entity();
+		manager.addEntity(entity);
+
+		UUID queryId = manager.createQuery(MockComponent.class);
+		List<Entity> initialQueryResults = manager.executeQuery(queryId);
+
+		Assert.assertTrue(initialQueryResults.isEmpty());
+
+		entity.addComponent(new MockComponent());
+
+		List<Entity> updatedQueryResults = manager.executeQuery(queryId);
+
+		Assert.assertFalse(updatedQueryResults.isEmpty());
+	}
+
 }

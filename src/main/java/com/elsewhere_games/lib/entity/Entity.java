@@ -1,9 +1,15 @@
 package com.elsewhere_games.lib.entity;
 
-//Utility Imports
+// Utility Containers
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+// Events Elsewhere
+import com.elsewhere_games.lib.entity.event.ComponentChangeListener;
+import com.elsewhere_games.lib.entity.event.ComponentChangeType;
 
 /**
  * <p>An entity is a container for components. Any entity can hold a mix of 
@@ -14,7 +20,7 @@ import java.util.UUID;
  * 
  * @author Hans Pragt
  *
- * @see EntityManager
+ * @see {@link EntityManager}
  */
 
 public class Entity {
@@ -26,9 +32,10 @@ public class Entity {
 	 * has been made protected so that only an entity manager can create new
 	 * entities.</p>
 	 */
-	protected Entity() {
+	Entity() {
 		this.id = UUID.randomUUID();
 		this.components = new HashMap<Class<?>, Component>();
+		this.listeners = new ArrayList<ComponentChangeListener>();
 	}
 
 	//// Identity ////
@@ -39,7 +46,7 @@ public class Entity {
 	 * weight.
 	 */
 	
-	private UUID id;
+	private final UUID id;
 	
 	/**
 	 * <p>Gets the unique identifier of this object.</p>
@@ -52,7 +59,7 @@ public class Entity {
 	
 	//// Components ////
 	
-	private Map<Class<?>, Component> components;
+	private final Map<Class<?>, Component> components;
 	
 	/**
 	 * <p>Check to see if this entity contains a component of the specified
@@ -117,6 +124,12 @@ public class Entity {
 		}
 		
 		this.components.put(component.getClass(), component);
+
+		/*
+		 * If we get past putting the component into the map, it should be
+		 * safe to fire a change event.
+		 */
+		this.fireComponentChange(ComponentChangeType.COMPONENT_ADDED, component);
 	}
 	
 	/**
@@ -126,7 +139,47 @@ public class Entity {
 	 * @param signature The class signature of the component to remove.
 	 */
 	public void removeComponent(Class<?> signature) {
-		this.components.remove(signature);
+		Component removed = this.components.remove(signature);
+		if (removed != null) {
+			this.fireComponentChange(ComponentChangeType.COMPONENT_REMOVED, removed);
+		}
+	}
+
+	//// Component Change Listeners ////
+
+	private final List<ComponentChangeListener> listeners;	// Notified on a change to the component list.
+
+	/**
+	 * <p>Adds a component change listener to this entity. When there is a
+	 * change to the collection of components of this entity, the listener
+	 * will be notified.</p>
+	 *
+	 * <p>Notifications are sent out in the order in which change listeners
+	 * are registered with this entity, in the same thread context as in
+	 * which the change to the component collection occurs.</p>
+	 *
+	 * @param listener Will receive notification of changes to the component set.
+	 */
+	public void addComponentChangeListener(final ComponentChangeListener listener) {
+		this.listeners.add(listener);
+	}
+
+	/**
+	 * <p>Removes a component change from this entity. The listener will
+	 * no longer receive notification about changes to the component set
+	 * of this entity.</p>
+	 *
+	 * @param listener Will no longer receive notifications about the component set.
+	 */
+	public void removeComponentChangeListener(final ComponentChangeListener listener) {
+		this.listeners.remove(listener);
+	}
+
+	// Trigger the call-back of all listeners registered with this class.
+	private void fireComponentChange(ComponentChangeType type, Component context) {
+		for (ComponentChangeListener listener : this.listeners) {
+			listener.onComponentChange(type, context);
+		}
 	}
 	
 	//// Object Overrides ////

@@ -1,6 +1,9 @@
 package com.elsewhere_games.lib.entity;
 
 // Java Containers
+import com.elsewhere_games.lib.entity.event.ComponentChangeListener;
+import com.elsewhere_games.lib.entity.event.ComponentChangeType;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -45,8 +48,8 @@ public class EntityManager {
 	 */
 	public Entity createEntity() {
 		Entity entity = new Entity();
-		this.entities.add(entity);
-		
+		this.addEntityAndObserve(entity);
+
 		// Mark all queries as dirty by clearing the cache:
 		for (UUID queryId : this.queries.keySet()) {
 			this.cachedQueryResults.remove(queryId);
@@ -70,7 +73,7 @@ public class EntityManager {
 			throw new IllegalArgumentException("This manager already contains the specified entity.");
 		}
 
-		this.entities.add(entity);
+		this.addEntityAndObserve(entity);
 
 		// Mark any cached query as dirty if there is a match:
 		for (UUID queryId : this.queries.keySet()) {
@@ -78,6 +81,22 @@ public class EntityManager {
 				this.cachedQueryResults.remove(queryId); 			// May not be cached, but no need to check.
 			}
 		}
+	}
+
+	// Adds the entity to this manager and observes it for changes.
+	private void addEntityAndObserve(Entity entity) {
+		this.entities.add(entity);
+
+		entity.addComponentChangeListener
+		(
+			new ComponentChangeListener() {
+
+				@Override
+				public void onComponentChange(ComponentChangeType type, Component component) {
+					markCacheDirtyFor(component);
+				}
+			}
+		);
 	}
 
 	/**
@@ -107,13 +126,7 @@ public class EntityManager {
 
 		// Mark queries which should return the specified entity as dirty:
 		if (this.entities.remove(entity)) {
-
-			// Compare the contents of every query against the entity:
-			for (UUID queryId : this.queries.keySet()) {
-				if (entity.hasComponents(this.queries.get(queryId))) {
-					this.cachedQueryResults.remove(queryId);		// May not be cached, but no need to check.
-				}
-			}
+			this.markCacheDirtyFor(entity);
 		}
 	}
 	
@@ -183,6 +196,9 @@ public class EntityManager {
 	 * <p>Executes the query with <code>queryId</code> generated from this
 	 * manager using the createQuery method to generate a collection of
 	 * entities with components specified at the time the query was created.</p>
+	 *
+	 * <p>The order in which the entities are stored in the resulting list
+	 * is unspecified.</p>
 	 * 
 	 * @param queryId The identifier of the query to execute.
 	 * 
@@ -213,4 +229,33 @@ public class EntityManager {
 		
 		return matchingEntities;
 	}
+
+	// Remove any cached entries containing the specified entity:
+	private void markCacheDirtyFor(Entity entity) {
+		List<UUID> dirtyQueries = new ArrayList<UUID>();
+		for (UUID cachedQueryId : this.cachedQueryResults.keySet()) {
+			if (this.cachedQueryResults.get(cachedQueryId).contains(entity)) {
+				dirtyQueries.add(cachedQueryId);
+			}
+		}
+
+		for (UUID dirtyQueryId : dirtyQueries) {
+			this.cachedQueryResults.remove(dirtyQueryId);
+		}
+	}
+
+	// Remove any cached entries containing the specified component:
+	private void markCacheDirtyFor(Component component) {
+		for (UUID queryId : this.queries.keySet()) {
+			Class<?>[] signatures = this.queries.get(queryId);
+			for (Class<?> signature : signatures) {
+				if (signature.equals(component.getClass())) {
+					this.cachedQueryResults.remove(queryId);
+					break;
+				}
+			}
+
+		}
+	}
+
 }

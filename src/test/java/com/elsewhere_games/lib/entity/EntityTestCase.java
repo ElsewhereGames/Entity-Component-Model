@@ -4,9 +4,14 @@ package com.elsewhere_games.lib.entity;
 import org.junit.Test;
 import org.junit.Assert;
 
-// Elsewhere Mocking
+// Events Elsewhere
+import com.elsewhere_games.lib.entity.event.ComponentChangeType;
+
+// Mocking Elsewhere
 import com.elsewhere_games.lib.entity.mock.MockComponent;
 import com.elsewhere_games.lib.entity.mock.AnotherMockComponent;
+import com.elsewhere_games.lib.entity.mock.MockComponentListener;
+
 
 /**
  * <p>This is the test case of the Entity class.</p>
@@ -85,6 +90,33 @@ public class EntityTestCase {
 		entity.removeComponent(MockComponent.class);
 
 		Assert.assertFalse(entity.hasComponent(MockComponent.class));
+	}
+
+	@Test
+	public void componentSetChangesCanBeObserved() {
+		Entity entity = new Entity();
+
+		MockComponentListener listener = new MockComponentListener();
+		entity.addComponentChangeListener(listener);
+
+		Assert.assertNull(listener.getLastTypeReceived());
+		Assert.assertNull(listener.getLastComponentReceived());
+
+		MockComponent mockComponent = new MockComponent();
+		entity.addComponent(mockComponent);
+
+		Assert.assertEquals(ComponentChangeType.COMPONENT_ADDED, listener.getLastTypeReceived());
+		Assert.assertEquals(mockComponent, listener.getLastComponentReceived());
+
+		listener.reset();
+
+		Assert.assertNull(listener.getLastTypeReceived());
+		Assert.assertNull(listener.getLastComponentReceived());
+
+		entity.removeComponent(MockComponent.class);
+
+		Assert.assertEquals(ComponentChangeType.COMPONENT_REMOVED, listener.getLastTypeReceived());
+		Assert.assertEquals(mockComponent, listener.getLastComponentReceived());
 	}
 
 }
