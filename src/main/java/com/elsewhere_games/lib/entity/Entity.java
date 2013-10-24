@@ -32,7 +32,7 @@ public class Entity {
 	 * has been made protected so that only an entity manager can create new
 	 * entities.</p>
 	 */
-	protected Entity() {
+	Entity() {
 		this.id = UUID.randomUUID();
 		this.components = new HashMap<Class<?>, Component>();
 		this.listeners = new ArrayList<ComponentChangeListener>();
@@ -46,7 +46,7 @@ public class Entity {
 	 * weight.
 	 */
 	
-	private UUID id;
+	private final UUID id;
 	
 	/**
 	 * <p>Gets the unique identifier of this object.</p>
@@ -59,7 +59,7 @@ public class Entity {
 	
 	//// Components ////
 	
-	private Map<Class<?>, Component> components;
+	private final Map<Class<?>, Component> components;
 	
 	/**
 	 * <p>Check to see if this entity contains a component of the specified
@@ -147,7 +147,7 @@ public class Entity {
 
 	//// Component Change Listeners ////
 
-	private List<ComponentChangeListener> listeners;	// Notified on a change to the component list.
+	private final List<ComponentChangeListener> listeners;	// Notified on a change to the component list.
 
 	/**
 	 * <p>Adds a component change listener to this entity. When there is a
