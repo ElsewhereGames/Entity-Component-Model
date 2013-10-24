@@ -123,7 +123,10 @@ public class Entity {
 			throw new IllegalArgumentException("This entity already contains a component of the type specified.");
 		}
 		
-		this.components.put(component.getClass(), component);
+		Component added = this.components.put(component.getClass(), component);
+		if (added != null) {
+			this.fireComponentChange(ComponentChangeType.COMPONENT_ADDED, added);
+		}
 	}
 	
 	/**
@@ -133,7 +136,10 @@ public class Entity {
 	 * @param signature The class signature of the component to remove.
 	 */
 	public void removeComponent(Class<?> signature) {
-		this.components.remove(signature);
+		Component removed = this.components.remove(signature);
+		if (removed != null) {
+			this.fireComponentChange(ComponentChangeType.COMPONENT_REMOVED, removed);
+		}
 	}
 
 	//// Component Change Listeners ////
