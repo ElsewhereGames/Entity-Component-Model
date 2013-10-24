@@ -20,7 +20,7 @@ import com.elsewhere_games.lib.entity.event.ComponentChangeType;
  * 
  * @author Hans Pragt
  *
- * @see EntityManager
+ * @see {@link EntityManager}
  */
 
 public class Entity {
@@ -123,10 +123,13 @@ public class Entity {
 			throw new IllegalArgumentException("This entity already contains a component of the type specified.");
 		}
 		
-		Component added = this.components.put(component.getClass(), component);
-		if (added != null) {
-			this.fireComponentChange(ComponentChangeType.COMPONENT_ADDED, added);
-		}
+		this.components.put(component.getClass(), component);
+
+		/*
+		 * If we get past putting the component into the map, it should be
+		 * safe to fire a change event.
+		 */
+		this.fireComponentChange(ComponentChangeType.COMPONENT_ADDED, component);
 	}
 	
 	/**
