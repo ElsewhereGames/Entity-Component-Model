@@ -1,9 +1,7 @@
 package com.elsewhere_games.lib.entity;
 
 // Java Containers
-import com.elsewhere_games.lib.entity.event.ComponentChangeListener;
-import com.elsewhere_games.lib.entity.event.ComponentChangeType;
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -13,6 +11,10 @@ import java.util.HashMap;
 
 // Java Utilities
 import java.util.UUID;
+
+// Events Elsewhere
+import com.elsewhere_games.lib.entity.event.ComponentChangeListener;
+import com.elsewhere_games.lib.entity.event.ComponentChangeType;
 
 /**
  *<p>The entity manager can maintain a collection of entities. More-over, a set
@@ -33,7 +35,7 @@ public class EntityManager {
 		this.entities = new HashSet<Entity>();
 		
 		// Query system:
-		this.queries = new HashMap<UUID, Class<?>[]>();
+		this.queries = new HashMap<UUID, List<Class<?>>>();
 		this.cachedQueryResults = new HashMap<UUID, List<Entity>>();
 	}
 	
@@ -155,7 +157,7 @@ public class EntityManager {
 	 * will provide a great speed in accessing the desired entities.
 	 */
 	
-	private final Map<UUID, Class<?>[]> queries;
+	private final Map<UUID, List<Class<?>>> queries;
 	
 	/**
 	 * <p>Creates a query into the entity system which, when executed, will
@@ -171,8 +173,10 @@ public class EntityManager {
 	 */
 	public UUID createQuery(Class<?>... signatures) {
 		UUID queryId = UUID.randomUUID();
-				
-		this.queries.put(queryId, signatures);
+		List<Class<?>> signatureList = new ArrayList<Class<?>>();
+		signatureList.addAll(Arrays.asList(signatures));
+
+		this.queries.put(queryId, signatureList);
 		
 		return queryId;
 	}
@@ -185,7 +189,10 @@ public class EntityManager {
 	 * @param signatures The new components to query the entity list for.
 	 */
 	public void updateQuery(UUID queryId, Class<?>... signatures) {
-		this.queries.put(queryId, signatures);
+		List<Class<?>> signatureList = new ArrayList<Class<?>>();
+		signatureList.addAll(Arrays.asList(signatures));
+
+		this.queries.put(queryId, signatureList);
 		this.cachedQueryResults.remove(queryId);
 		
 	}
@@ -219,7 +226,7 @@ public class EntityManager {
 	// Build a list of all entities matching the query:
 	private List<Entity> findQueryMatches(UUID queryId) {
 		List<Entity> matchingEntities = new ArrayList<Entity>();
-		Class<?>[] signatures = this.queries.get(queryId);
+		List<Class<?>> signatures = this.queries.get(queryId);
  		
 		for (Entity entity : this.entities) {
 			if (entity.hasComponents(signatures)) {
@@ -247,14 +254,10 @@ public class EntityManager {
 	// Remove any cached entries containing the specified component:
 	private void markCacheDirtyFor(Component component) {
 		for (UUID queryId : this.queries.keySet()) {
-			Class<?>[] signatures = this.queries.get(queryId);
-			for (Class<?> signature : signatures) {
-				if (signature.equals(component.getClass())) {
-					this.cachedQueryResults.remove(queryId);
-					break;
-				}
+			List<Class<?>> signatures = this.queries.get(queryId);
+			if (signatures.contains(component.getClass())) {
+				this.cachedQueryResults.remove(queryId);
 			}
-
 		}
 	}
 

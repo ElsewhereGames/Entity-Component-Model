@@ -2,6 +2,7 @@ package com.elsewhere_games.lib.entity;
 
 // Utility Containers
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,12 +79,26 @@ public class Entity {
 	 * <code>signatures</code> classes.</p>
 	 * 
 	 * @param signatures The class signatures of the components to check for.
+	 *
 	 * @return <code>true</code> if this entity contains all the components of
 	 * the specified <code>signatures</code>, <code>false</code> otherwise.
 	 */
 	public boolean hasComponents(Class<?>... signatures) {
+		return this.hasComponents(Arrays.asList(signatures));
+	}
+
+	/**
+	 * <p>Check to see if this entity contains all components of the specified
+	 * <code>signatures</code> classes.</p>
+	 *
+	 * @param signatures The class signatures of the components to check for.
+	 *
+	 * @return <code>true</code> if this entity contains all the components of
+	 * the specified <code>signatures</code>, <code>false</code> otherwise.
+	 */
+	public boolean hasComponents(List<Class<?>> signatures) {
 		boolean hasAll = true;
-		
+
 		// Check for absence of any of the signatures:
 		for (Class<?> signature : signatures) {
 			// Fast fail:
@@ -92,7 +107,7 @@ public class Entity {
 				break;
 			}
 		}
-		
+
 		return hasAll;
 	}
 	
